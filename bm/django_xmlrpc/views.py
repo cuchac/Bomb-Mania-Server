@@ -77,7 +77,7 @@ def handle_xmlrpc(request):
             return HttpResponseServerError()
     else:
         methods = rpc.xmlrpcdispatcher.system_listMethods()
-        method_list = []
+        categories = {}
 
         for method in methods:
             sig_ = rpc.xmlrpcdispatcher.system_methodSignature(method)
@@ -88,8 +88,18 @@ def handle_xmlrpc(request):
 
             # this just reads your docblock, so fill it in!
             method_help = rpc.xmlrpcdispatcher.system_methodHelp(method)
+            
+            category = "General"
+            
+            if method in rpc.xmlrpcdispatcher.funcs:
+                func = rpc.xmlrpcdispatcher.funcs[method]
+                if hasattr(func, "_xmlrpc_signature"):
+                    category = func._xmlrpc_signature["category"]
+                    category = category if category else "General"
+                elif method.find("system.") == 0:
+                    category = "System"
 
-            method_list.append((method, sig, method_help))
+            categories.setdefault(category, []).append((method, sig, method_help))
 
         if hasattr(settings, 'XMLRPC_GET_TEMPLATE'):
             # This behaviour is deprecated
@@ -99,7 +109,8 @@ def handle_xmlrpc(request):
             template = settings.XMLRPC_GET_TEMPLATE
         else:
             template = 'xmlrpc_get.html'
-        return render_to_response(template, {'methods': method_list})
+
+        return render_to_response(template, {'categories': categories})
 
 
 # Load up any methods that have been registered with the server in settings

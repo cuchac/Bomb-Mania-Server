@@ -180,11 +180,12 @@ def permission_required(perm=None):
 
         # Update the function's docstring
         if func.__doc__:
-            func.__doc__ = func.__doc__ + \
+            func.__doc__ = __authenticated_call.__doc__ = func.__doc__ + \
                 "\n\nNote: Authentication is required."""
             if perm:
-                func.__doc__ += ' this function requires ' \
+                __authenticated_call.__doc__ += ' this function requires ' \
                                              +  '"%s" permission.' % perm
+                func.__doc__ = __authenticated_call.__doc__
 
         return __authenticated_call
 
