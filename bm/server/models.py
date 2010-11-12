@@ -2,8 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
+class Rating():
+    def rate(self, rating):
+        self.reputation=self.reputation+rating
+        self.save()
+
 # User management
-class UserProfile(models.Model):
+class UserProfile(models.Model, Rating):
     PUB_FIELDS = ("user.username", "user.first_name", "user.last_name", "user.email", "credit", "experience", "reputation")
     RW_FIELDS = ("user.username", "user.first_name", "user.last_name", "user.email")
     user = models.ForeignKey(User, unique=True)
@@ -19,6 +24,7 @@ class UserProfile(models.Model):
             raise Exception("Not enough credits. Needs {0} but has only {1}".format(amount, self.credit))
         self.credit-=amount
         self.save()
+
     
 def create_user_profile(sender, instance, created, **kwargs):  
     if created:  
@@ -64,7 +70,7 @@ class Ship(ShipAttributes):
     model = models.ForeignKey(ShipModel, default="", verbose_name="Ship model", help_text="Model of the ship")
     name = models.CharField("Ship Name", default="", max_length=30, help_text="Users name for the ship")
     experience = models.IntegerField("Experience", default=0, help_text="Numerically expressed ships experience")
-    upgrades = models.ManyToManyField(Upgrade, verbose_name="Upgrades", help_text="Upgrades mounted on the ship")
+    upgrades = models.ManyToManyField(Upgrade, verbose_name="Upgrades", blank=True, help_text="Upgrades mounted on the ship")
 
     def __str__(self):
         return self.name
@@ -79,21 +85,63 @@ class Battle(models.Model):
     
     def __str__(self):
         return "Battle #{0}".format(str(self.id))
+    
+    def setResults(self, results):
+        '''Set result of battle. Check the consistency of input data. Confirm the correct results
+        
+        @param results: array of {ship_id:x, kills:x, lives:x} dictionaries
+        '''
+        sum_kills = 0
+        sum_lives = 0
+
+        for result in results:
+            if "ship_id" not in result or "kills" not in result or "lives" not in result:
+                raise Exception("Missing values in ship_results dictionary")
+            
+            if result["lives"] > self.rounds or result["kills"] > (self.rounds*len(self.ships)):
+                raise Exception("Inconsistent results")
+            
+            sum_lives += result["lives"]
+            sum_kills += result["kills"]
+            
+            ship = self.ships.through.objects.get(ship__id=result["ship_id"])
+            
+            if ship.confirmed:
+                if ship.kills != int(result["kills"]) or ship.lives != int(result["lives"]):
+                    ship.confirmed = ship.confirmed - 1
+                    if ship.confirmed > 0:
+                        continue
+                else:
+                    ship.confirmed = ship.confirmed + 1
+                    continue
+
+            ship.kills = int(result["kills"])
+            ship.lives = int(result["lives"])
+            ship.confirmed = ship.confirmed + 1
+            
+        if (sum_kills + sum_lives) != self.rounds*len(self.ships):
+            raise Exception("Inconsistent results!")
+        
+        self.save()
+            
+        return True
 
 class ShipsInBattle(models.Model):
-    PUB_FIELDS = ("ship", "battle", "position", "kills", "lives")
+    PUB_FIELDS = ("ship", "ship.user", "position", "kills", "lives")
     
     ship = models.ForeignKey(Ship)
     battle = models.ForeignKey(Battle)
     position = models.IntegerField("Position", default=0, help_text="Final player position in battle")
     kills = models.IntegerField("Kills", default=0, help_text="How many opponents player killed")
     lives =  models.IntegerField("Lives", default=0, help_text="How many lives has player after battle")
+    confirmed = models.IntegerField("Confirmed", default=0, help_text="How many users confirmed results of the match?")
+    user_confirmed = models.BooleanField("User Confirmed", default=False, help_text="Does the owner of this ship confirmed the results?")
     
     class Meta:
         unique_together = (("ship", "battle"),)
 
 ## Maps
-class Map(models.Model):
+class Map(models.Model, Rating):
     PUB_FIELDS = ("name", "players", "reputation")
     
     name = models.CharField("Map Name", default="", max_length=30, help_text="Name of the map")

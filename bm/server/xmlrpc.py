@@ -1,7 +1,7 @@
 # register XML-RPC functions
 from bm.django_xmlrpc.decorators import xmlrpc_func, permission_required
 from bm.server.models import User, Map, Message, Ship, ShipModel, Upgrade,\
-    UserProfile
+    UserProfile, Battle
 from django.db import models
 from django.db.models.manager import Manager
 
@@ -25,7 +25,7 @@ def getPublicFields(model, max_level = 1):
         else:
             return {"id":str(model.id), "name": str(model)}
     elif isinstance(model, Manager):
-        return getObjectList(model.all())
+        return getObjectList(model.all(), max_level-1)
     else:
         return model
 
@@ -38,8 +38,11 @@ def setPublicFields(model, data):
     model.save()
     return True
 
-def getObjectList(objects):
-    return [{"id":str(object.id), "name": str(object)} for object in objects]
+def getObjectList(objects, max_level = 0):
+    if max_level < 1:
+        return [{"id":str(object.id), "name": str(object)} for object in objects]
+    else:
+        return [getPublicFields(object, max_level) for object in objects]
 
 
 ####################
@@ -149,7 +152,7 @@ def listShips(user):
 def getShipDetail(user, ship_id):
     """Return detailed information about ship
     
-    @return: array of details"""
+    @return: dictionary of details"""
     return getPublicFields(Ship.objects.get(id=ship_id, user=user))
 
 @permission_required()
@@ -202,10 +205,10 @@ def listShipModels():
     return getObjectList(ShipModel.objects.all())
 
 @xmlrpc_func(returns='array', category="Shop", args=["int"])
-def getShipModelDetail(user, model_id):
+def getShipModelDetail(model_id):
     """Return detailed information about ship model
     
-    @return: array of details"""
+    @return: dictionary of details"""
     return getPublicFields(ShipModel.objects.get(id=model_id))
 
 @xmlrpc_func(returns='bool', category="Shop")
@@ -216,10 +219,10 @@ def listShipUpgrades():
     return getObjectList(Upgrade.objects.all())
 
 @xmlrpc_func(returns='array', category="Shop", args=["int"])
-def getShipUpgradeDetail(user, upgrade_id):
+def getShipUpgradeDetail(upgrade_id):
     """Return detailed information about ship upgrade
     
-    @return: array of details"""
+    @return: dictionary of details"""
     return getPublicFields(Upgrade.objects.get(id=upgrade_id))
 
 ######################
@@ -232,7 +235,7 @@ def listPlayers(search_criteria):
     
     @param search_criteria: dictionary. Every key,value pair means: search in field "key" for "value". 
     Key names can be in form of Django filter parameters - http://docs.djangoproject.com/en/dev/ref/models/querysets/#field-lookups
-    For example:
+    For example: 
     search_criteria = {username__contains:"joe"} find all players containing "joe" in name
     search_criteria = {reputation__gt:5} find all players with reputation greater than 5
     @return: Array of players"""
@@ -250,28 +253,139 @@ def listPlayers(search_criteria):
 def getPlayerDetail(user, player_id):
     """Return detailed information about player
     
-    @return: array of details"""
+    @return: dictionary of details"""
     return getPublicFields(User.objects.get(id=player_id))
 
-@xmlrpc_func(returns='array', category="Players", args=["int"])
+@permission_required()
+@xmlrpc_func(returns='array', category="Players", args=["int", "bool"])
 def ratePlayer(user, player_id, positive = True):
-    """Return detailed information about player
+    """Rate players
     
-    @return: array of details"""
-    return getPublicFields(User.objects.get(id=player_id))
+    @param player_id: ID of player to rate
+    @param positive: True to rate positive, False to rate negative
+    @return: True if success"""
+    return User.objects.get(id=player_id).get_profile().rate((1 if positive else -1))
 
 ######################
 ## Maps
 ######################
 
-@permission_required()
+@xmlrpc_func(returns='array', category="Maps")
+def listMaps():
+    """Get list of available maps
+    
+    @return: list of maps"""
+    return getPublicFields(Map.objects.all())
+
 @xmlrpc_func(returns='array', category="Maps", args = ["int"])
-def getMapDetails(map_id):
+def getMapDetail(map_id):
     """Get detailed information of map
     
-    @return: dictionary of information"""
+    @return: dictionary of details"""
     return getPublicFields(Map.objects.get(id=map_id))
 
+@xmlrpc_func(returns='array', category="Maps", args = ["int"])
+def downloadMap(map_id):
+    """Download map
+    
+    @return: dictionary of details and map data"""
+    map = Map.objects.get(id=map_id)
+    mapDetail = getPublicFields(map)
+    mapDetail["data"] = "MAP_DATA_FILE"
+    return mapDetail
+
+@xmlrpc_func(returns='array', category="Maps", args = ["int"])
+def uploadMap(name, number_of_players, mapData):
+    """Upload new map
+    
+    @return: ID of uploaded map"""
+    newMap = Map.objects.create(name=name, players=number_of_players)
+    newMap.save()
+    return newMap.id
+
+@permission_required()
+@xmlrpc_func(returns='array', category="Maps", args=["int", "bool"])
+def rateMap(user, map_id, positive = True):
+    """Rate map
+    
+    @param map_id: ID of map to rate
+    @param positive: True to rate positive, False to rate negative
+    @return: True if success"""
+    return Map.objects.get(id=map_id).rate((1 if positive else -1))
+
+######################
+## Battles
+######################
+
+@xmlrpc_func(returns='array', category="Battles")
+def listBattles():
+    """List all played battles
+    
+    @return: Array of battles"""
+    return getObjectList(Battle.objects.all())
+
+@xmlrpc_func(returns='array', category="Battles", args=["int"])
+def getBattleDetail(battle_id):
+    """Return detailed information about battle
+    
+    @return: dictionary of details"""
+    ret = getPublicFields(Battle.objects.get(id=battle_id))
+    ret["result"] = getPublicFields(Battle.objects.get(id=battle_id).ships.through.objects, 2)
+    return ret
+
+@xmlrpc_func(returns='bool', category="Battles")
+def listPlayerBattles(player_id):
+    """List all ship upgrades available
+    
+    @return: Array of upgrades"""
+    return getObjectList(Battle.objects.filter(ships__user=player_id).all())
+
+@permission_required()
+@xmlrpc_func(returns='int', category="Battles", args=["array", "int", "int"])
+def announceBattle(user, ship_ids, map_id, rounds):
+    """Announce creation of new battle. @ship_ids are participating in the battle.
+    
+    @param ship_ids: array of ships IDs
+    @param map_id: ID of used map
+    @param rounds: number of rounds of battle
+    @return: ID of created battle"""
+    if len(ship_ids) < 2:
+        raise Exception("Too few players")
+    
+    ships = [Ship.objects.get(id=ship_id) for ship_id in ship_ids]
+    
+    map = Map.objects.get(id=map_id)
+    
+    newBattle = Battle.objects.create(ships=ships, map=map, rounds=rounds)
+    newBattle.save()
+    return newBattle.id
+
+@permission_required()
+@xmlrpc_func(returns='bool', category="Battles", args=["array"])
+def confirmBattle(user, battle_id, results):
+    """Confirm results of battle.
+    
+    @param battle_id: ID of battle
+    @param results: array containing dictionaries of ship_id, lives and kills for each ship in battle.
+    Example: results = [{ship_id:5, kills:2, lives:0}, {ship_id:2, kills:5, lives:3}]
+    @return: True if results was confirmed"""
+    if len(results) < 2:
+        raise Exception("Too few results")
+    
+    battle = Battle.objects.get(id = battle_id)
+    
+    owner_ship = battle.ships.through.objects.get(ship__user = user)
+    
+    if owner_ship.user_confirmed:
+        raise Exception("Already confirmed results!")
+    
+    owner_ship.user_confirmed = True
+
+    return battle.setResults(results)
+
+######################
+## Testing
+######################
 
 @xmlrpc_func(returns='string', args=['string'])
 def test_xmlrpc(text):

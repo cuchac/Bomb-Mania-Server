@@ -16,23 +16,41 @@
 	padding: 2px;
 	background-color: #EEE;
 }
+.class {
+/*	display: none;*/
+}
 -->
 </style>
+
+<script type="text/javascript" src="/media/js/jquery.min.js"></script>
+<script type="text/javascript" src="/media/js/jquery.init.js"></script>
+<script>
+/*django.jQuery(function(){
+	django.jQuery('.class_title').click(function(event) {
+		django.jQuery(event.target.parent.sibling).toggle('slow');
+})
+	});*/
+</script>
 {% endblock %}
 
 {% block content %}
 <h1>XML-RPC Service</h1>
-<h2>You need to invoke this service using an XML-RPC Client.</h2>
-<h2>The following methods are available:</h2>
-{% for m in methods %}
-  <div class="function">
-	<h3>{{ m.0 }}</h3>
-		<div class="function_desc">
-		<strong>Types of Argument{{ m.1.args|length|pluralize }}: </strong> {{ m.1.args }} <br />
-		<strong>Type of Return: </strong> {{ m.1.returns }} <br />
-		<pre class="function_doc">{{ m.2 }}</pre>
-		</div>
-  </div>
+<h3>You need to invoke this service using an XML-RPC Client.</h2>
+<h3>The following categories and methods are available:</h2>
+{% for category,methods in categories.items %}
+	<h2><a class="class_title" href="#" >{{category}}</a></h3>
+	<div class="class">
+	{% for m in methods %}
+	  <div class="function">
+		<h3>{{ m.0 }}</h3>
+			<div class="function_desc">
+			<strong>Types of Argument{{ m.1.args|length|pluralize }}: </strong> {{ m.1.args }} <br />
+			<strong>Type of Return: </strong> {{ m.1.returns }} <br />
+			<pre class="function_doc">{{ m.2 }}</pre>
+			</div>
+	  </div>
+	{% endfor %}
+	</div>
 {% endfor %}
 {% endblock %}
 
