@@ -42,6 +42,7 @@ class ShipAttributes(models.Model):
     acceleration = models.IntegerField("Acceleration", default=1, help_text="Acceleration of the ship")
     sockets = models.IntegerField("Sockets", default=0, help_text="Number of available sockets for upgrades")
     bombs = models.IntegerField("Bombs", default=1, help_text="Number of bombs ship can plant")
+    bombRange = models.IntegerField("Bomb Range", default=1, help_text="Range of bombs explosion")
 
 ## Players ships and upgrades
 class ShipModel(ShipAttributes):
