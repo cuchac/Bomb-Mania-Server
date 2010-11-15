@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <script src="{{ MEDIA_URL }}js/jquery-1.4.4.min.js"></script>
+    <script src="{{ MEDIA_URL }}js/bm_client.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/reset.css"> 
+    <link rel="stylesheet" type="text/css" href="{{ MEDIA_URL }}css/bm_client.css"> 
+    
+{% endblock%}
+
+{% block body %}
+
+    <div id="logo">
+    {% block logo %}
+    	<div id="logo_image">
+	    	<div id=login>
+	    	{% block login %}
+	    		{% if user.is_authenticated %}
+	    			Fighter {{user}}<br>
+	    			<a href="{% url django.contrib.auth.views.logout %}">Logout</a>
+	    		{% else %}
+	    			<a href="{% url bm.client.views.login %}">Login</a>
+	    		{% endif %}
+	    	{% endblock%}
+	    	</div>
+    	</div>
+    {% endblock%}
+    </div>
+    <div id="main_body">
+	    <div id="menu">
+	    {% block menu %}
+	    	<ul>
+	        {% for menu_item in menu %}
+	            <li class="vcenter"><a href="{{ menu_item.url }}">{{ menu_item.name }}</a></li>
+	        {% endfor %}
+	        </ul>
+	    {% endblock%}
+	    </div>
+	    
+	    <div id="main">
+		{% block content %}
+		{% endblock%}
+	    </div>
+	</div>
+{% endblock%}
