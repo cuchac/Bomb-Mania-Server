@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from bm import settings
 
 class Rating():
     def rate(self, rating):
@@ -50,6 +51,7 @@ class ShipModel(ShipAttributes):
     
     name = models.CharField("Model Name", default="", max_length=30, help_text="Name of ship model")
     price = models.IntegerField("Price", default=0, help_text="Price of the ship")
+    image = models.FileField("Model Image", help_text="Image of the ship", upload_to=settings.MEDIA_ROOT+"server/", null=True, blank=True)
     
     def __str__(self):
         return self.name
@@ -78,8 +80,10 @@ class Ship(ShipAttributes):
 
 ## Battles and players in them
 class Battle(models.Model):
-    PUB_FIELDS = ("ships", "map", "rounds")
+    PUB_FIELDS = ("date", "ships", "map", "rounds")
+    LIST_FIELDS = ("date", "map", "rounds")
 
+    date = models.DateTimeField("Date", auto_now_add=True, help_text="Date and time of battle")
     ships = models.ManyToManyField(Ship, related_name="battles", through="ShipsInBattle", verbose_name="ShipsInBattle", help_text="Ships playing the battle")
     map = models.ForeignKey("Map", verbose_name="Battle Map", help_text="Map used for battle")
     rounds = models.IntegerField("Rounds", default=5, help_text="Number of rounds the battle had")
@@ -148,19 +152,22 @@ class Map(models.Model, Rating):
     name = models.CharField("Map Name", default="", max_length=30, help_text="Name of the map")
     players = models.IntegerField("Players", default=2, help_text="Maximum number of players in map")
     reputation = models.IntegerField("Reputation", default=0, help_text="Number of positive reputation points")
+    image = models.FileField("Map Image", help_text="Image of the map", upload_to=settings.MEDIA_ROOT+"server/", null=True, blank=True)
     
     def __str__(self):
         return self.name
     
 ## Messaging
 class Message(models.Model):
-    PUB_FIELDS = ("user_from", "user_to", "subject", "text", "viewed")
+    PUB_FIELDS = ("user_from", "user_to", "subject", "text", "viewed", "date")
+    LIST_FIELDS = ("user_from", "user_to", "subject", "viewed", "date")
     
     user_from = models.ForeignKey(User, related_name="+", verbose_name="User From", help_text="Sender of this message")
     user_to = models.ForeignKey(User, related_name="+", verbose_name="User To", help_text="Receiver of this message")
     subject = models.TextField("Subject", default="", help_text="Subject of the message")
     text = models.TextField("Text", default="", help_text="Body of the message")
     viewed = models.BooleanField("Viewed", default=False, help_text="Whether this message was viewed by receiver")
+    date = models.DateTimeField("Date", auto_now_add=True, help_text="Date message was sent")
     
     def __str__(self):
         return "Message #{0}".format(str(self.id))
