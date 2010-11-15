@@ -54,7 +54,7 @@ MEDIA_ROOT = SITE_ROOT+'/media/'
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/static/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
@@ -79,13 +79,19 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'bm.urls'
+TEMPLATE_CONTEXT_PROCESSORS = (
+   'django.contrib.auth.context_processors.auth', 
+   'django.core.context_processors.debug', 
+   'django.core.context_processors.i18n', 
+   'django.core.context_processors.media', 
+   'django.contrib.messages.context_processors.messages',
+)
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-    SITE_ROOT+"/../templates/"
+    #SITE_ROOT+"/../templates/"
 )
 
 INSTALLED_APPS = (
@@ -96,13 +102,10 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
-    'bm.django_xmlrpc',
-    'bm.server',
     'south',
 )
 
 INTERNAL_IPS = ('127.0.0.1',)
 
-AUTH_PROFILE_MODULE = 'server.UserProfile'
 INSTALLED_APPS = INSTALLED_APPS+('debug_toolbar',)
 MIDDLEWARE_CLASSES = MIDDLEWARE_CLASSES + ('debug_toolbar.middleware.DebugToolbarMiddleware',)
