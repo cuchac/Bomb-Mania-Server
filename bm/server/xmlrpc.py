@@ -18,12 +18,14 @@ def resolve_dotted_attribute(obj, attr, value_to_set = None):
     
     return obj
 
-def getPublicFields(model, max_level = 1):
+def getPublicFields(model, max_level = 1, fields = None):
     if isinstance(model, models.Model):
         if max_level:
-            return {field.split(".")[-1]:getPublicFields(resolve_dotted_attribute(model, field), max_level-1) for field in ("id",)+model.PUB_FIELDS}
+            if not fields:
+                fields = model.PUB_FIELDS
+            return {field.split(".")[-1]:getPublicFields(resolve_dotted_attribute(model, field), max_level-1) for field in ("id",)+fields}
         else:
-            return {"id":str(model.id), "name": str(model)}
+            return {"id":str(model.id), "name": str(model), "object":model.__class__.__name__}
     elif isinstance(model, Manager):
         return getObjectList(model.all(), max_level-1)
     else:
@@ -40,7 +42,11 @@ def setPublicFields(model, data):
 
 def getObjectList(objects, max_level = 0):
     if max_level < 1:
-        return [{"id":str(object.id), "name": str(object)} for object in objects]
+        ret = [{"id":str(object.id), "name": str(object), "object":object.__class__.__name__} for object in objects]
+        if hasattr(objects.model, "LIST_FIELDS"):
+            for index,object in dict(enumerate(objects)).items():
+                ret[index].update(getPublicFields(object, fields=object.LIST_FIELDS))
+        return ret
     else:
         return [getPublicFields(object, max_level) for object in objects]
 
@@ -250,11 +256,11 @@ def listPlayers(search_criteria):
     return getObjectList(User.objects.filter(**search).all())
 
 @xmlrpc_func(returns='array', category="Players", args=["int"])
-def getPlayerDetail(user, player_id):
+def getPlayerDetail(player_id):
     """Return detailed information about player
     
     @return: dictionary of details"""
-    return getPublicFields(User.objects.get(id=player_id))
+    return getPublicFields(User.objects.get(id=player_id).get_profile())
 
 @permission_required()
 @xmlrpc_func(returns='array', category="Players", args=["int", "bool"])
