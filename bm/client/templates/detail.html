@@ -1,8 +1,30 @@
 {% extends "base_page.html" %}
 
 {% block content %}
-	{% for key,value in object.items %}
-		{{key}}:{{ value }}<br>
-	{% endfor %}
-
+	{% block detail_title %}
+	<h2>{{object_name}} {{object.name}} details</h2>
+	{% endblock %}
+	
+	{% block detail_values %}
+	<table>
+	  <tr>
+	    <th></th>
+	    <th></th>
+	  </tr>
+		{% for key,value in object.items %}
+		{% if key != "object" and key != "id" %}
+		<tr>
+			<td>{{ key }}</td>
+    		<td>
+    			{% if "id" in value %}
+					<a href="{% url bm.client.views.detail object=value.object id=value.id %}">{{ value.name }}</a>
+				{% else %}
+					{{ value }}
+				{% endif %}
+			</td>
+    	</tr>
+		{% endif %}
+		{% endfor %}	  
+	</table>
+	{% endblock %}
 {% endblock %}
