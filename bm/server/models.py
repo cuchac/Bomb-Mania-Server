@@ -46,8 +46,8 @@ class ShipAttributes(models.Model):
 
 ## Players ships and upgrades
 class ShipModel(ShipAttributes):
-    PUB_FIELDS = ("name", "price", "image.url") + ShipAttributes.PUB_FIELDS
-    LIST_FIELDS = ("name", "price", "image.url")
+    PUB_FIELDS = ("name", "price", "image") + ShipAttributes.PUB_FIELDS
+    LIST_FIELDS = ("name", "price", "image")
     name = models.CharField("Model Name", default="", max_length=30, help_text="Name of ship model")
     price = models.IntegerField("Price", default=0, help_text="Price of the ship")
     image = models.FileField("Model Image", help_text="Image of the ship", upload_to="server/ship_models", null=True, blank=True)

@@ -223,9 +223,7 @@ def getShipModelDetail(model_id):
     """Return detailed information about ship model
     
     @return: dictionary of details"""
-    ret = getPublicFields(ShipModel.objects.get(id=model_id))
-    print(ret)
-    return ret
+    return getPublicFields(ShipModel.objects.get(id=model_id))
 
 @xmlrpc_func(returns='bool', category="Shop")
 def listShipUpgrades():
