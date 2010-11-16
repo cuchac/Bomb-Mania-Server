@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import patterns, include
 
 from django.contrib import admin
+from bm import settings
 admin.autodiscover()
 
 urlpatterns = patterns('',
@@ -10,7 +11,12 @@ urlpatterns = patterns('',
     # Admin section
     (r'^admin/', include(admin.site.urls)),
     (r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    
-    # Rest is client
-    (r'^$', include('bm.client.urls')),
 )
+
+# Handle local file on debug server
+if settings.DEBUG:
+    urlpatterns += patterns('django.views.static',
+    (r'^static/(?P<path>.*)$', 
+        'serve', {
+        'document_root': settings.MEDIA_ROOT,
+        'show_indexes': True }),)

@@ -18,10 +18,10 @@ urlpatterns = patterns('',
 
 )
 
+# Handle local file on debug server
 if settings.DEBUG:
     urlpatterns += patterns('django.views.static',
     (r'^static/(?P<path>.*)$', 
         'serve', {
         'document_root': settings.MEDIA_ROOT,
         'show_indexes': True }),)
-    

@@ -6,22 +6,30 @@
 		<thead>
 		<tr>
 			{% for key,value in object_list.0.items %}
-				<th>{{key}}</th>
+			{% if key != "object" and key != "id" %}
+				<th>{{key|capfirst}}</th>
+			{% endif %}
 			{% endfor %}
+
 		</tr>
 		</thead>
-	{{object_list.data}}
+
 		{% for object in object_list %}
-			<tr>
+			<tr class="{% cycle 'row1' 'row2' %}">
 			{% for key,value in object.items %}
+			{% if key != "object" and key != "id" %}
 				<td>
 				{% if "id" in value %}
-					<a href="{% url bm.client.views.detail object=value.object id=value.id %}">{{ value.name }}</a>"
+					<a href="{% url bm.client.views.detail object=value.object id=value.id %}">{{ value.name }}</a>
 				{% else %}
 					{{ value }}
 				{% endif %}
 				</td>
+			{% endif %}
 			{% endfor %}
+				<td>
+					<a href="{% url bm.client.views.detail object=object_name id=object.id %}">Details</a>
+				</td>
 			</tr>
 		{% endfor %}
 	

@@ -4,6 +4,7 @@ from django.views.generic import list_detail
 from bm.client.RPCQuerySet import RPCQuerySet
 from django.contrib.auth.views import login as generic_login
 from django.contrib.auth.decorators import login_required
+from django.template.loader import find_template, select_template
 
 MENU = ( ('My Battles','bm.client.views.player_stats'), 
          ('Transmissions','bm.client.views.messages'), 
@@ -32,23 +33,33 @@ def player_stats(request, part = None):
     if part == "oponents":
         pass
     else:
+        object = "Battle"
         queryset = RPCQuerySet("PlayerBattle", params=[request.user.id])
         
-    return list_detail.object_list(request, queryset, template_name="list.html")
+    return list_detail.object_list(request, queryset, template_name="list.html", extra_context={'object_name':object})
 
 def messages(request):
-    pass
+    object = "Message"
+    queryset = RPCQuerySet("Message", request=request)
+        
+    return list_detail.object_list(request, queryset, template_name="list.html", extra_context={'object_name':object})
 
 def maps(request):
-    pass
+    object = "Map"
+    queryset = RPCQuerySet("Map")
+        
+    return list_detail.object_list(request, queryset, template_name="list.html", extra_context={'object_name':object})
 
 def shop(request):
-    pass
+    object = "ShipModel"
+    queryset = RPCQuerySet("ShipModel")
+        
+    return list_detail.object_list(request, queryset, template_name="list.html", extra_context={'object_name':object})
 
 def stats(request):
     pass
 
 def detail(request, object, id):
     queryset = RPCQuerySet(object)
-        
-    return list_detail.object_detail(request, queryset, object_id=id, template_name="detail.html")
+    template = select_template(["detail/{0}.html".format(object), "detail.html",])    
+    return list_detail.object_detail(request, queryset, object_id=id, template_name=template.name, extra_context={'object_name':object})

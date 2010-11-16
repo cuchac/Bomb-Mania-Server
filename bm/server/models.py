@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from bm import settings
 
 class Rating():
     def rate(self, rating):
@@ -10,7 +9,7 @@ class Rating():
 
 # User management
 class UserProfile(models.Model, Rating):
-    PUB_FIELDS = ("user.username", "user.first_name", "user.last_name", "user.email", "credit", "experience", "reputation")
+    PUB_FIELDS = ("user.id", "user.username", "user.first_name", "user.last_name", "user.email", "credit", "experience", "reputation")
     RW_FIELDS = ("user.username", "user.first_name", "user.last_name", "user.email")
     user = models.ForeignKey(User, unique=True)
     credit = models.IntegerField("Credits", default=0, help_text="Amount of credits user has available")
@@ -47,11 +46,11 @@ class ShipAttributes(models.Model):
 
 ## Players ships and upgrades
 class ShipModel(ShipAttributes):
-    PUB_FIELDS = ("name", "price") + ShipAttributes.PUB_FIELDS
-    
+    PUB_FIELDS = ("name", "price", "image.url") + ShipAttributes.PUB_FIELDS
+    LIST_FIELDS = ("name", "price", "image.url")
     name = models.CharField("Model Name", default="", max_length=30, help_text="Name of ship model")
     price = models.IntegerField("Price", default=0, help_text="Price of the ship")
-    image = models.FileField("Model Image", help_text="Image of the ship", upload_to=settings.MEDIA_ROOT+"server/", null=True, blank=True)
+    image = models.FileField("Model Image", help_text="Image of the ship", upload_to="server/ship_models", null=True, blank=True)
     
     def __str__(self):
         return self.name
@@ -67,7 +66,8 @@ class Upgrade(ShipAttributes):
         return self.name
 
 class Ship(ShipAttributes):
-    PUB_FIELDS = ("user", "model", "model", "name", "experience", "upgrades") + ShipAttributes.PUB_FIELDS
+    PUB_FIELDS = ("user", "model", "name", "experience", "upgrades") + ShipAttributes.PUB_FIELDS
+    LIST_FIELDS = ("user", "name", "model")
     RW_FIELDS = ("name")
     user = models.ForeignKey(User, related_name="ships", unique=True)
     model = models.ForeignKey(ShipModel, default="", verbose_name="Ship model", help_text="Model of the ship")
@@ -147,12 +147,13 @@ class ShipsInBattle(models.Model):
 
 ## Maps
 class Map(models.Model, Rating):
-    PUB_FIELDS = ("name", "players", "reputation")
+    PUB_FIELDS = ("name", "players", "reputation", "image")
+    LIST_FIELDS = ("name", "players", "reputation", "image")
     
     name = models.CharField("Map Name", default="", max_length=30, help_text="Name of the map")
     players = models.IntegerField("Players", default=2, help_text="Maximum number of players in map")
     reputation = models.IntegerField("Reputation", default=0, help_text="Number of positive reputation points")
-    image = models.FileField("Map Image", help_text="Image of the map", upload_to=settings.MEDIA_ROOT+"server/", null=True, blank=True)
+    image = models.FileField("Map Image", help_text="Image of the map", upload_to="server/maps", null=True, blank=True)
     
     def __str__(self):
         return self.name

@@ -57,6 +57,27 @@ A:ACTIVE, A:HOVER, A:VISITED, A:LINK {
 	margin-right: auto ;
 }
 
+#main table {
+	text-align: center;
+	margin-left: auto;
+    margin-right: auto;
+    
+    border-collapse: separate;
+    border-spacing: 5px;
+}
+
+#main td {
+	padding: 5px 10px 5px 10px;
+}
+
+#main th {
+	padding: 5px 10px 5px 10px;
+}
+
+#main thead {
+	background-color: #333333;
+}
+
 /* Help classes */
 .vcenter {
 	display: table-cell;
