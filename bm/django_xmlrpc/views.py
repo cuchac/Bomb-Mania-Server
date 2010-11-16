@@ -49,6 +49,8 @@ import bm.django_xmlrpc as rpc
 import collections
 from django.views.decorators.csrf import csrf_exempt
 import traceback
+from xmlrpc import client
+from collections import OrderedDict
 
 
 # We create a local DEBUG variable from the data in settings.
@@ -143,3 +145,43 @@ if hasattr(settings, 'XMLRPC_METHODS'):
 
         rpc.xmlrpcdispatcher.register_function(func, name)
 
+class MyMarshaller(client.Marshaller):
+    def _dump(self, value, write):
+        try:
+            f = self.dispatch[type(value)]
+        except KeyError:
+            # check if this object can be marshalled as a structure
+            try:
+                value.__dict__
+            except:
+                raise TypeError("cannot marshal %s objects" % type(value))
+            # check if this class is a sub-class of a basic type,
+            # because we don't know how to marshal these types
+            # (e.g. a string sub-class)
+            for type_ in type(value).__mro__:
+                if type_ in self.dispatch.keys():
+                    raise TypeError("cannot marshal %s objects" % type(value))
+            # XXX(twouters): using "_arbitrary_instance" as key as a quick-fix
+            # for the p3yk merge, this should probably be fixed more neatly.
+            f = self.dispatch["_arbitrary_instance"]
+        f(self, value, write)
+        
+    def dump_sorteddict(self, value, write, escape=client.escape):
+        i = id(value)
+        if i in self.memo:
+            raise TypeError("cannot marshal recursive dictionaries")
+        self.memo[i] = None
+        dump = self._dump
+        write("<value><struct>\n")
+        for k, v in value.items():
+            write("<member>\n")
+            if not isinstance(k, str):
+                raise TypeError("dictionary key must be string")
+            write("<name>%s</name>\n" % escape(k))
+            dump(v, write)
+            write("</member>\n")
+        write("</struct></value>\n")
+        del self.memo[i]
+    client.Marshaller.dispatch[OrderedDict] = dump_sorteddict
+    
+client.FastMarshaller=MyMarshaller

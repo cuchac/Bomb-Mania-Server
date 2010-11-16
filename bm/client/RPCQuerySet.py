@@ -6,8 +6,9 @@ Created on Nov 15, 2010
 from xmlrpc.client import ServerProxy
 from bm import settings_client
 from django.contrib.auth.models import User
+from collections import OrderedDict
 
-class RPCQueryObject(dict):
+class RPCQueryObject(OrderedDict):
     
     def __init__(self, *args, **kwargs):
         ret = super(RPCQueryObject, self).__init__(*args, **kwargs)

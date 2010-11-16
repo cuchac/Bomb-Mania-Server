@@ -4,6 +4,8 @@ from bm.server.models import User, Map, Message, Ship, ShipModel, Upgrade,\
     UserProfile, Battle
 from django.db import models
 from django.db.models.manager import Manager
+from collections import OrderedDict
+from django.db.models.fields.files import FieldFile
 
 def resolve_dotted_attribute(obj, attr, value_to_set = None):
     """resolve_dotted_attribute(a, 'b.c.d') => a.b.c.d"""
@@ -11,7 +13,10 @@ def resolve_dotted_attribute(obj, attr, value_to_set = None):
 
     for i in attrs:
         last_obj = obj
-        obj = getattr(last_obj, i)
+        try:
+            obj = getattr(last_obj, i)
+        except:
+            return ""
         
     if value_to_set is not None:
         return setattr(last_obj, i, value_to_set)
@@ -23,11 +28,14 @@ def getPublicFields(model, max_level = 1, fields = None):
         if max_level:
             if not fields:
                 fields = model.PUB_FIELDS
-            return {field.split(".")[-1]:getPublicFields(resolve_dotted_attribute(model, field), max_level-1) for field in ("id",)+fields}
+            fields = ("id",)+fields
+            return OrderedDict([(field.split(".")[-1], getPublicFields(resolve_dotted_attribute(model, field), max_level-1)) for field in fields])
         else:
-            return {"id":str(model.id), "name": str(model), "object":model.__class__.__name__}
+            return OrderedDict((("id", str(model.id)), ("name", str(model)), ("object", model.__class__.__name__)))
     elif isinstance(model, Manager):
         return getObjectList(model.all(), max_level-1)
+    elif isinstance(model, FieldFile):
+        return model.url
     else:
         return model
 
@@ -42,7 +50,7 @@ def setPublicFields(model, data):
 
 def getObjectList(objects, max_level = 0):
     if max_level < 1:
-        ret = [{"id":str(object.id), "name": str(object), "object":object.__class__.__name__} for object in objects]
+        ret = [OrderedDict((("id",str(object.id)), ("name", str(object)), ("object",object.__class__.__name__))) for object in objects]
         if hasattr(objects.model, "LIST_FIELDS"):
             for index,object in dict(enumerate(objects)).items():
                 ret[index].update(getPublicFields(object, fields=object.LIST_FIELDS))
@@ -215,7 +223,9 @@ def getShipModelDetail(model_id):
     """Return detailed information about ship model
     
     @return: dictionary of details"""
-    return getPublicFields(ShipModel.objects.get(id=model_id))
+    ret = getPublicFields(ShipModel.objects.get(id=model_id))
+    print(ret)
+    return ret
 
 @xmlrpc_func(returns='bool', category="Shop")
 def listShipUpgrades():
@@ -281,7 +291,7 @@ def listMaps():
     """Get list of available maps
     
     @return: list of maps"""
-    return getPublicFields(Map.objects.all())
+    return getObjectList(Map.objects.all())
 
 @xmlrpc_func(returns='array', category="Maps", args = ["int"])
 def getMapDetail(map_id):
