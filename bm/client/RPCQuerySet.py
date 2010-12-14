@@ -7,17 +7,26 @@ from xmlrpc.client import ServerProxy
 from bm import settings_client
 from django.contrib.auth.models import User
 from collections import OrderedDict
+from django.core.exceptions import ObjectDoesNotExist
 
 class RPCQueryObject(OrderedDict):
+    DoesNotExist = ObjectDoesNotExist
     
     def __init__(self, *args, **kwargs):
         ret = super(RPCQueryObject, self).__init__(*args, **kwargs)
         if "id" in self:
             self.id = self["id"]
+            self.pk = self["id"]
         self._meta = type("Meta", (object,), {'app_label':'', 'object_name':'', 'pk':type("pk", (object,), {'name':'id'})()})()
         return ret
     
+    def __str__(self):
+        if "name" in self:
+            return self["name"]
+        else:
+            return str(self["id"])
     
+
 
 class RPCQuerySet(object):
     '''
@@ -71,6 +80,10 @@ class RPCQuerySet(object):
         else:
             method = "list{0}s".format(self.name)
             
+        self.sendRequest(method)
+            
+    def sendRequest(self, method, *additional_params):
+            
         if hasattr(self.rpc, method):
             method = getattr(self.rpc, method)
         else:
@@ -85,6 +98,7 @@ class RPCQuerySet(object):
             params.append(self.id)
             
         params += self.params
+        params += additional_params
         
         self.data = method(*params)
         
@@ -95,10 +109,20 @@ class RPCQuerySet(object):
         self.id = pk
         return self
         
-    def get(self):
+    def get(self, pk = None):
         if self.data is None:
             self.fetchData()
+        if pk:
+            for item in self.data:
+                if item["id"] == pk:
+                    return RPCQueryObject(item)
+            raise Exception("Item with pk:{0} not found".format(pk))
         return RPCQueryObject(self.data[0])
+    
+    def all(self):
+        if self.data is None:
+            self.fetchData()
+        return [RPCQueryObject(item) for item in self.data]
 
 class RPCAuthUser(User):
     def __init__(self, data):
