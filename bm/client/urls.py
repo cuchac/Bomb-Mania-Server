@@ -3,8 +3,12 @@ from bm import settings
 
 urlpatterns = patterns('',
     (r'^$', 'bm.client.views.index'),
+    
     (r'^my_battles', 'bm.client.views.player_stats'),
-    (r'^transmissions', 'bm.client.views.messages'),
+    
+    (r'^transmissions$', 'bm.client.views.messages'),
+    (r'^transmissions/(?P<id>[0-9]+)/(?P<action>[a-z_A-Z]+)', 'bm.client.views.messages'),
+    
     (r'^star_maps', 'bm.client.views.maps'),
     (r'^space_docks', 'bm.client.views.shop'),
     (r'^stats', 'bm.client.views.stats'),
@@ -15,6 +19,7 @@ urlpatterns = patterns('',
     # User login/logout
     (r'^login/$', 'bm.client.views.login'),
     (r'^logout/$', 'django.contrib.auth.views.logout', {'next_page': '/'}),
+    (r'^new-fighter/$', 'bm.client.views.register'),
 
 )
 
