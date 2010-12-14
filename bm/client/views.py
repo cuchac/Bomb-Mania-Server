@@ -84,19 +84,24 @@ def maps(request):
 
 def shop(request):
     object = "ShipModel"
-    queryset = RPCQuerySet("ShipModel")
+    queryset = RPCQuerySet(object)
         
     return list_detail.object_list(request, queryset, template_name="list.html", extra_context={'object_name':object})
 
-def stats(request):
-    pass
+def stats(request, category = "player_rate"):
+    
+    if category == "player_rate":
+        object = "Player"
+        order_by = "-userprofile__reputation"
+        category_title = "Top Rated Players"
+    
+    queryset = RPCQuerySet(object, params=[{}, order_by, 5])
+        
+    return list_detail.object_list(request, queryset, template_name="stats.html", extra_context={'object_name':object, "category":category_title})
 
 def detail(request, object, id, auth = False):
     if object == "User":
-#        if request.user.id == int(id):
-#            return player_stats(request, "details")
-#        else:
-            object = "Player"
+        object = "Player"
     
     queryset = RPCQuerySet(object, request = request if auth else None)
     template = select_template(["detail/{0}.html".format(object), "detail.html",])    
