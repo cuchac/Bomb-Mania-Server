@@ -256,15 +256,17 @@ def getShipUpgradeDetail(upgrade_id):
 ## Players
 ######################
 
-@xmlrpc_func(returns='array', category="Players", args=["array"])
-def listPlayers(search_criteria = {}):
-    """List all players, filter by given @search_criteria
+@xmlrpc_func(returns='array', category="Players", args=["array", "string", "int"])
+def listPlayers(search_criteria = {}, order_by = "id", limit = None):
+    """List all or @limit players, filter by given @search_criteria and order them by @order_by
     
     @param search_criteria: dictionary. Every key,value pair means: search in field "key" for "value". 
     Key names can be in form of Django filter parameters - http://docs.djangoproject.com/en/dev/ref/models/querysets/#field-lookups
     For example: 
     search_criteria = {username__contains:"joe"} find all players containing "joe" in name
     search_criteria = {reputation__gt:5} find all players with reputation greater than 5
+    @param order_by: name of field to use for sorting of result
+    @param limit: return only @limit players
     @return: Array of players"""
     
     search = {}
@@ -274,7 +276,7 @@ def listPlayers(search_criteria = {}):
         if len(matches):
             search[matches[0]+field[len(matches[0]):]] =  value
 
-    return getObjectList(User.objects.filter(**search).all())
+    return getObjectList(User.objects.order_by(order_by).filter(**search)[:limit])
 
 @xmlrpc_func(returns='array', category="Players", args=["int"])
 def getPlayerDetail(player_id):
