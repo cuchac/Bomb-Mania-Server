@@ -151,6 +151,16 @@ def getMessageDetail(user, message_id):
         
     return ret
 
+@permission_required()
+@xmlrpc_func(returns='bool', category="Messaging", args=["int"])
+def deleteMessage(user, message_id):
+    """Delete message of id=@message_id
+    
+    @return: true if deleted successfully"""
+    Message.objects.get(id=message_id).delete()
+        
+    return True
+
 
 ######################
 ## Ship management
@@ -247,7 +257,7 @@ def getShipUpgradeDetail(upgrade_id):
 ######################
 
 @xmlrpc_func(returns='array', category="Players", args=["array"])
-def listPlayers(search_criteria):
+def listPlayers(search_criteria = {}):
     """List all players, filter by given @search_criteria
     
     @param search_criteria: dictionary. Every key,value pair means: search in field "key" for "value". 
