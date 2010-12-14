@@ -9,7 +9,8 @@ class Rating():
 
 # User management
 class UserProfile(models.Model, Rating):
-    PUB_FIELDS = ("user.id", "user.username", "user.first_name", "user.last_name", "user.email", "credit", "experience", "reputation")
+    PUB_FIELDS = ("user.id", "user.username", "credit", "experience", "reputation")
+    LOGGED_FIELDS = ("user.id", "user.username", "user.first_name", "user.last_name", "user.email", "credit", "experience", "reputation")
     RW_FIELDS = ("user.username", "user.first_name", "user.last_name", "user.email")
     user = models.ForeignKey(User, unique=True)
     credit = models.IntegerField("Credits", default=0, help_text="Amount of credits user has available")
