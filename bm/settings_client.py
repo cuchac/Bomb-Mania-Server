@@ -17,4 +17,4 @@ RPC_SERVER = "http://localhost:8001/xml-rpc/"
 AUTHENTICATION_BACKENDS = ('bm.client.RPCQuerySet.RPCAuthBackend',)
 
 
-Session.objects.all().delete()
+#Session.objects.all().delete()
