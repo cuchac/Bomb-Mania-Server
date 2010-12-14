@@ -1,6 +1,11 @@
 {% extends "base_page.html" %}
 
 {% block content %}
+	{% block list_title %}
+	<h2>List of {{object_name}}s</h2>
+	{% endblock %}
+	
+	{% block list_list %}
 	{% if object_list %}
 	<table>
 		<thead>
@@ -15,6 +20,7 @@
 		</thead>
 
 		{% for object in object_list %}
+		{% block list_row %}
 			<tr class="{% cycle 'row1' 'row2' %}">
 			{% for key,value in object.items %}
 			{% if key != "object" and key != "id" %}
@@ -22,20 +28,29 @@
 				{% if "id" in value %}
 					<a href="{% url bm.client.views.detail object=value.object id=value.id %}">{{ value.name }}</a>
 				{% else %}
-					{{ value }}
+					{% if key == "image" %}
+						<a href="{{ value }}"><img src="{{ value }}" style="max-height: 50px;"></a>
+					{% else %}
+						{{ value }}
+					{% endif %}
 				{% endif %}
 				</td>
 			{% endif %}
 			{% endfor %}
+			{% block list_actions %}
 				<td>
 					<a href="{% url bm.client.views.detail object=object_name id=object.id %}">Details</a>
 				</td>
 			</tr>
+			{% endblock %}
+		{% endblock %}
 		{% endfor %}
+		
 	
 	</table>
 	{% else %}
 		<h3>No data to display</h3>
 	{% endif %}
+	{% endblock %}
 
 {% endblock %}

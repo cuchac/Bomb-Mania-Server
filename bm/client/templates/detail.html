@@ -14,16 +14,47 @@
 		{% for key,value in object.items %}
 		{% if key != "object" and key != "id" %}
 		<tr>
-			<td>{{ key }}</td>
-    		<td>
+		<td>{{ key|capfirst }}</td>
+		<td>
+			{% if "id" in value.0 %}
+			<table>
+			  <tr>
+			    {% for subkey,subvalue in value.0.items %}
+				{% if subkey != "object" and subkey != "id" %}
+				<th>{{ subkey|capfirst }}</th>
+				{% endif %}
+				{% endfor %}
+			  </tr>
+			  	{% for subitem in value %}
+			  	<tr>
+					{% for subkey,subvalue in subitem.items %}
+					{% if subkey != "object" and subkey != "id" %}
+			    		<td>
+			    			{% if "id" in subvalue %}
+								<a href="{% url bm.client.views.detail object=subvalue.object id=subvalue.id %}">{{ subvalue.name }}</a>
+							{% else %}
+								{{ subvalue }}
+							{% endif %}
+						</td>
+					{% endif %}
+					{% endfor %}
+					</tr>
+				{% endfor %}	  
+			</table>
+	  		{% else %}
     			{% if "id" in value %}
 					<a href="{% url bm.client.views.detail object=value.object id=value.id %}">{{ value.name }}</a>
 				{% else %}
-					{{ value }}
+					{% if key == "image" %}
+						<a href="{{ value }}"><img src="{{ value }}" style="max-height: 250px;"></a>
+					{% else %}
+						{{ value }}
+					{% endif %}
 				{% endif %}
-			</td>
+	    	{% endif %}
+	    	</td>
     	</tr>
-		{% endif %}
+    	{% endif %}
 		{% endfor %}	  
 	</table>
 	{% endblock %}

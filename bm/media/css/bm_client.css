@@ -7,6 +7,17 @@ A:ACTIVE, A:HOVER, A:VISITED, A:LINK {
 	color: white;
 }
 
+h1 {
+	font-size: 20px;
+	padding-top: 10px;
+	padding-bottom: 15px;
+}
+
+img {
+	padding-top: 10px;
+	padding-bottom: 15px;
+}	
+
 /* HEADER */
 #logo {
 	width: 100%;
@@ -68,6 +79,7 @@ A:ACTIVE, A:HOVER, A:VISITED, A:LINK {
 
 #main td {
 	padding: 5px 10px 5px 10px;
+	vertical-align: middle;
 }
 
 #main th {
@@ -76,6 +88,11 @@ A:ACTIVE, A:HOVER, A:VISITED, A:LINK {
 
 #main thead {
 	background-color: #333333;
+}
+
+/* Messages */
+.messages_new {
+	font-weight: bold;
 }
 
 /* Help classes */
