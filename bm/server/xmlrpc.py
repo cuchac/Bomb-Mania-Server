@@ -35,7 +35,10 @@ def getPublicFields(model, max_level = 1, fields = None):
     elif isinstance(model, Manager):
         return getObjectList(model.all(), max_level-1)
     elif isinstance(model, FieldFile):
-        return model.url
+        try:
+            return model.url
+        except:
+            return ""
     else:
         return model
 
@@ -93,7 +96,7 @@ def getUserDetail(user):
     """Get detailed information of my account
     
     @return: dictionary of information"""
-    return getPublicFields(user.get_profile())
+    return getPublicFields(user.get_profile(), fields = UserProfile.LOGGED_FIELDS)
 
 @permission_required()
 @xmlrpc_func(returns='bool', category="User", args=["array"])
