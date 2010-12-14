@@ -42,7 +42,7 @@ class RPCQuerySet(object):
         self.params = params
         
         if request:
-            auth = (request.session["username"], request.session["password"])
+            self.auth = (request.session["username"], request.session["password"])
         
         self.data = None
         
