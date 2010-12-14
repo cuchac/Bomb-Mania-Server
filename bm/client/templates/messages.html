@@ -1,0 +1,17 @@
+{% extends "list.html" %}
+
+
+
+{% block list_row %}
+	<span id="message{{object.id}}" {% if object.new %}class="messages_new"{% endif %}>
+		{{ block.super }}
+	</span>
+{% endblock %}
+
+{% block list_actions %}
+	<td>
+		<a href="{% url bm.client.views.messages id=object.id action='read' %}">Read</a>
+		<a href="{% url bm.client.views.messages id=object.id action='reply' %}">Reply</a>
+		<a href="{% url bm.client.views.messages id=object.id action='delete' %}">Delete</a>
+	</td>
+{% endblock %}
