@@ -1,0 +1,20 @@
+{% extends "base_page.html" %}
+
+{% block title %}Register new Fighter{% endblock%}
+
+{% block content %}
+
+      <h1>Register new Fighter</h1>
+      <form action="." method="post">
+      {% csrf_token %}
+        {% for field in form %}
+		    <div class="fieldWrapper">
+		        {{ field.errors }}
+		        {{ field.label_tag }}: {{ field }}
+		    </div>
+		{% endfor %}
+
+        <input type="submit" value="Create the account" />
+      </label>
+
+{% endblock %}

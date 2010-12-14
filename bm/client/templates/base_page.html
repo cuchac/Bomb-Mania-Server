@@ -20,7 +20,8 @@
 	    			Fighter {{user}}<br>
 	    			<a href="{% url django.contrib.auth.views.logout %}">Logout</a>
 	    		{% else %}
-	    			<a href="{% url bm.client.views.login %}">Login</a>
+	    			<a href="{% url bm.client.views.login %}">Login</a><br>
+	    			<a href="{% url bm.client.views.register %}">Register Fighter</a>
 	    		{% endif %}
 	    	{% endblock%}
 	    	</div>
@@ -40,6 +41,12 @@
 	    
 	    <div id="main">
 		{% block content %}
+			<h1>Welcome fighter to BombMania!</h1>
+			<p>You can <a href="{url bm.client.views.register}">register</a> a new fighter or <a href="{% url bm.client.views.login %}">login</a> and challenge other fighters in space battle!</p>
+			
+			<center>
+			<img alt="" src="{{ MEDIA_URL }}/images/screenshot.jpg">
+			</center>
 		{% endblock%}
 	    </div>
 	</div>
