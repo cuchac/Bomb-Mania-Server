@@ -1,0 +1,20 @@
+{% extends "base_page.html" %}
+
+{% block title %}Send new Transmission{% endblock%}
+
+{% block content %}
+
+      <h1>Send new Transmission</h1>
+      <form action="{% url bm.client.views.messages_send %}" method="post">
+      {% csrf_token %}
+        {% for field in form %}
+		    <div class="fieldWrapper">
+		        {{ field.errors }}
+		        {{ field.label_tag }}: {{ field }}
+		    </div>
+		{% endfor %}
+
+        <input type="submit" value="Send" />
+      </label>
+
+{% endblock %}

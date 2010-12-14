@@ -10,7 +10,7 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login as user_login
 from django.forms import fields
-from bm.client.forms import RegistrationForm
+from bm.client.forms import RegistrationForm, MessageForm
 
 MENU = ( ('My Battles','bm.client.views.player_stats'), 
          ('Transmissions','bm.client.views.messages'), 
@@ -45,14 +45,36 @@ def player_stats(request, part = None):
     return list_detail.object_list(request, queryset, template_name="list.html", extra_context={'object_name':object})
 
 @login_required
-def messages(request, id = None, action = "list"):
-    print(id, action)
+def messages(request):
     object = "Message"
-    if action == "list":
-        queryset = RPCQuerySet("Message", request=request, params=[False])
-        return list_detail.object_list(request, queryset, template_name="messages.html", extra_context={'object_name':object})
-    elif action == "read":
-        return detail(request, object, id, True)
+    queryset = RPCQuerySet(object, request=request, params=[False])
+    return list_detail.object_list(request, queryset, template_name="messages.html", extra_context={'object_name':object})
+
+@login_required
+def messages_send(request):
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            queryset = RPCQuerySet("Message", request = request)
+            queryset.sendRequest("sendMessage", form.cleaned_data["user_to"]["id"], form.cleaned_data["subject"], form.cleaned_data["message"])
+
+            return HttpResponseRedirect(reverse("bm.client.views.messages"))
+    else:
+        form = MessageForm(initial = request.GET)
+    
+    return render_to_response("compose.html", {
+        'form' : form
+    }, context_instance=RequestContext(request))
+
+@login_required
+def messages_read(request, id):
+    return detail(request, "Message", id, True)
+
+@login_required
+def messages_delete(request, id):
+    queryset = RPCQuerySet("Message", request = request)
+    queryset.sendRequest("deleteMessage", id)
+    return HttpResponseRedirect(reverse("bm.client.views.messages"))
 
 def maps(request):
     object = "Map"
