@@ -7,7 +7,9 @@ urlpatterns = patterns('',
     (r'^my_battles', 'bm.client.views.player_stats'),
     
     (r'^transmissions$', 'bm.client.views.messages'),
-    (r'^transmissions/(?P<id>[0-9]+)/(?P<action>[a-z_A-Z]+)', 'bm.client.views.messages'),
+    (r'^transmissions/receive/(?P<id>[0-9]+)', 'bm.client.views.messages_read'),
+    (r'^transmissions/delete/(?P<id>[0-9]+)', 'bm.client.views.messages_delete'),
+    (r'^transmissions/transmit', 'bm.client.views.messages_send'),
     
     (r'^star_maps', 'bm.client.views.maps'),
     (r'^space_docks', 'bm.client.views.shop'),
