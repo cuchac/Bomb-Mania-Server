@@ -16,6 +16,11 @@ h1 {
 img {
 	padding-top: 10px;
 	padding-bottom: 15px;
+}
+
+p {
+	padding-bottom: 10px;
+	line-height: 120%;
 }	
 
 /* HEADER */
@@ -39,7 +44,7 @@ img {
 	float: right;
 	padding-top: 45px;
 	text-align: left;
-	width: 150px;
+	width: 170px;
 }
 
 
