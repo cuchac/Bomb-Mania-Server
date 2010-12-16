@@ -13,7 +13,7 @@ class UserProfile(models.Model, Rating):
     LOGGED_FIELDS = ("user.id", "user.username", "user.first_name", "user.last_name", "user.email", "credit", "experience", "reputation")
     RW_FIELDS = ("user.username", "user.first_name", "user.last_name", "user.email")
     user = models.ForeignKey(User, unique=True)
-    credit = models.IntegerField("Credits", default=0, help_text="Amount of credits user has available")
+    credit = models.IntegerField("Credits", default=1000, help_text="Amount of credits user has available")
     experience = models.IntegerField("Experience", default=0, help_text="Numerically expressed user skills")
     reputation = models.IntegerField("Reputation", default=0, help_text="Number of positive reputation points")
     
@@ -70,7 +70,7 @@ class Ship(ShipAttributes):
     PUB_FIELDS = ("user", "model", "name", "experience", "upgrades") + ShipAttributes.PUB_FIELDS
     LIST_FIELDS = ("user", "name", "model")
     RW_FIELDS = ("name")
-    user = models.ForeignKey(User, related_name="ships", unique=True)
+    user = models.ForeignKey(User, related_name="ships")
     model = models.ForeignKey(ShipModel, default="", verbose_name="Ship model", help_text="Model of the ship")
     name = models.CharField("Ship Name", default="", max_length=30, help_text="Users name for the ship")
     experience = models.IntegerField("Experience", default=0, help_text="Numerically expressed ships experience")
