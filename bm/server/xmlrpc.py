@@ -66,10 +66,13 @@ def getObjectList(objects, max_level = 0):
 ## User functions
 ####################
 @xmlrpc_func(returns='int', category="User")
-def CreateUser(username, email, password):
+def createUser(username, email, password):
     """Create new user.
     
     @return: New user ID"""
+    if User.objects.filter(username=username).exists():
+        raise Exception("User already exists")
+    
     newUser = User.objects.create_user(username, email, password)
     newUser.save()
     return newUser.id
@@ -80,7 +83,8 @@ def deleteUser(user):
     """Delete user account
     
     @return: True if success"""
-    return user.delete()
+    user.delete()
+    return True
 
 @permission_required()
 @xmlrpc_func(returns='bool', category="User")
