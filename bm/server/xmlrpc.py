@@ -368,9 +368,9 @@ def getBattleDetail(battle_id):
 
 @xmlrpc_func(returns='bool', category="Battles")
 def listPlayerBattles(player_id):
-    """List all ship upgrades available
+    """List all battles that player already encountered
     
-    @return: Array of upgrades"""
+    @return: Array of battles"""
     return getObjectList(Battle.objects.filter(ships__user=player_id).all())
 
 @permission_required()
