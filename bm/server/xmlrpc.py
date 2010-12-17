@@ -359,8 +359,11 @@ def getBattleDetail(battle_id):
     """Return detailed information about battle
     
     @return: dictionary of details"""
-    ret = getPublicFields(Battle.objects.get(id=battle_id))
-    ret["result"] = getPublicFields(Battle.objects.get(id=battle_id).ships.through.objects, 2)
+    battle = Battle.objects.get(id=battle_id)
+    ret = getPublicFields(battle)
+    print("Battle ships:",battle.ships.through.objects.filter(battle=battle).all())
+    ret["result"] = getObjectList(battle.ships.through.objects.filter(battle=battle), 1)
+    print(ret)
     return ret
 
 @xmlrpc_func(returns='bool', category="Battles")
