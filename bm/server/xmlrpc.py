@@ -203,10 +203,7 @@ def buyShip(user, model_id, name = None):
     @param name: Name of new ship
     @return: ID of new ship"""
     model = ShipModel.objects.get(id=model_id)
-    user.get_profile().spentMoney(model.price)
-    newShip = Ship.objects.create(user=user, name = (name if name else model.name))
-    newShip.save()
-    return newShip.id
+    return model.buyShip(user, name)
 
 @permission_required()
 @xmlrpc_func(returns='bool', category="Ships", args=["int", "int"])

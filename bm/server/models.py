@@ -55,6 +55,12 @@ class ShipModel(ShipAttributes):
     
     def __str__(self):
         return self.name
+    
+    def buyShip(self, user, name):
+        newShip = Ship.objects.create(user=user, name = (name if name else self.name))
+        newShip.save()
+        user.get_profile().spentMoney(self.price)
+        return newShip.id
  
 class Upgrade(ShipAttributes):
     PUB_FIELDS = ("name", "description", "price") + ShipAttributes.PUB_FIELDS
