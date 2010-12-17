@@ -10,9 +10,10 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth import authenticate, login as user_login
 from django.forms import fields
-from bm.client.forms import RegistrationForm, MessageForm
+from bm.client.forms import RegistrationForm, MessageForm, LoginForm
 
-MENU = ( ('My Battles','bm.client.views.player_stats'), 
+MENU = ( ('Origin','bm.client.views.index'), 
+         ('My Battles','bm.client.views.player_stats'), 
          ('Transmissions','bm.client.views.messages'), 
          ('Star Maps','bm.client.views.maps'),
          ('Space Docks','bm.client.views.shop'),
@@ -32,7 +33,7 @@ def login(request):
         request.session["username"] = request.POST["username"]
         request.session["password"] = request.POST["password"]
         
-    return generic_login(request, template_name='login.html')
+    return generic_login(request, template_name='login.html', authentication_form=LoginForm)
 
 @login_required
 def player_stats(request, part = None):
@@ -93,7 +94,7 @@ def stats(request, category = "player_rate"):
     if category == "player_rate":
         object = "Player"
         order_by = "-userprofile__reputation"
-        category_title = "Top Rated Players"
+        category_title = "Top Rated Fighters"
     
     queryset = RPCQuerySet(object, params=[{}, order_by, 5])
         

@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.forms import fields
 from bm.client.RPCQuerySet import RPCQuerySet
 
@@ -14,3 +14,17 @@ class UserForm(forms.Form):
     
 class RegistrationForm(UserCreationForm):
     email = fields.EmailField()
+    
+    def __init__(self, *args, **kwargs):
+        ret = super(RegistrationForm, self).__init__(*args, **kwargs)
+        self.fields["username"].label = "Fighter Name"
+        self.fields["username"].help_text = ""
+        self.fields["password2"].help_text = ""
+        return ret
+    
+class LoginForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        ret = super(LoginForm, self).__init__(*args, **kwargs)
+        self.fields["username"].label = "Fighter Name"
+        self.fields["username"].help_text = ""
+        return ret
