@@ -170,21 +170,19 @@ def deleteMessage(user, message_id):
 ## Ship management
 ######################
 
-@permission_required()
-@xmlrpc_func(returns='array', category="Ships")
-def listShips(user):
-    """Return list of players ships
+@xmlrpc_func(returns='array', category="Ships", args=["int"])
+def listShips(user_id):
+    """Return list of player @user_id ships
     
     @return: array of ships"""
-    return getObjectList(Ship.objects.filter(user=user).only("id"))
+    return getObjectList(Ship.objects.filter(user__id__exact=user_id).only("id"))
 
-@permission_required()
 @xmlrpc_func(returns='array', category="Ships", args=["int"])
-def getShipDetail(user, ship_id):
+def getShipDetail(ship_id):
     """Return detailed information about ship
     
     @return: dictionary of details"""
-    return getPublicFields(Ship.objects.get(id=ship_id, user=user))
+    return getPublicFields(Ship.objects.get(id=ship_id))
 
 @permission_required()
 @xmlrpc_func(returns='bool', category="Ships", args=["int", "array"])
