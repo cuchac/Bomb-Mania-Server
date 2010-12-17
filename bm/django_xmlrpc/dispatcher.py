@@ -2,6 +2,7 @@
 
 Author::
     Graham Binns
+    Cuchac
 
 Credit must go to Brendan W. McAdams <brendan.mcadams@thewintergrp.com>, who
 posted the original SimpleXMLRPCDispatcher to the Django wiki:
