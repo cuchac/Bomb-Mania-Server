@@ -51,6 +51,8 @@ p {
 /* MENU */
 #menu ul {
 	border-spacing: 5px;
+	position: relative;
+	left: -125px;
 }
 
 #menu li{
