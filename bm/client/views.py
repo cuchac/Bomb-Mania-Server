@@ -113,7 +113,7 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             queryset = RPCQuerySet("User")
-            queryset.rpc.CreateUser(form.cleaned_data["username"], form.cleaned_data["email"], form.cleaned_data["password1"])
+            queryset.rpc.createUser(form.cleaned_data["username"], form.cleaned_data["email"], form.cleaned_data["password1"])
 
             user = authenticate(username=form.cleaned_data["username"], password=form.cleaned_data["password1"])
             user_login(request, user)
